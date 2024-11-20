@@ -1,0 +1,125 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*<link href="~/plugins/bootstrap-sweetalert/sweet-alert.css" rel="stylesheet" />
+*@<div class="col-md-12" style="padding:50px 120px 50px">
+    <form class="col-md-10">
+        <div class="mb-3">
+            <label for="Subject" class="form-label">Subject</label>
+            <input type="text" class="form-control" id="Subject" aria-describedby="Subject">
+        </div>
+        <br />
+
+        <div class="mb-3">
+            <label for="Message" class="form-label">Message</label>
+            <input type="text" class="form-control" id="Message">
+        </div>
+        <br />
+        <button type="button" onclick="Save();" class="btn btn-primary">Save</button>
+    </form>
+</div>
+
+
+<div class="col-md-10" style="padding:50px 120px 50px">
+    <table class="table table-bordered" id="tblSubjects">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Subject</th>
+                <th>Message</th>
+                <th>Send</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+@*<script src="~/plugins/bootstrap-sweetalert/sweet-alert.js"></script>
+<script src="~/plugins/bootstrap-sweetalert/sweet-alert.min.js"></script>*@
+<script>
+    $(document).ready(function () {
+        GetMessageSubject();
+    });
+    
+    function Save() {
+        var Subject = $('#Subject').val();
+        var Message = $('#Message').val();
+        if (Subject != null && Subject != "" && Message != null && Message != "") {
+            
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: "Home/SaveSubject",
+                data: JSON.stringify({
+                    Subject: Subject,
+                    Message, Message
+                }),
+                dataType: "json",
+                success: function (response, data) {
+                    
+                    if (response.data) {
+
+                        swal(
+                            'success',
+                            'Saved Successfully.',
+                            'success'
+                        )
+
+                        GetMessageSubject();
+                    }
+                },
+                error: function (err) {
+                }
+            });
+
+        }
+        else {
+            swal(
+                'error',
+                'Please Enter the subject and Message!',
+                'error'
+            )
+        }
+    }
+
+    function GetMessageSubject() {
+        $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: "Home/GetSubject",
+            data:'',
+            dataType: "json",
+            success: function (response, data) {
+                
+                if (response.data!=null){
+                    FillTable(response.data);
+                }
+            },
+            error: function (err) {
+            }
+        });
+
+
+    }
+
+    function FillTable(objList){
+        $('#tblSubjects tbody').find('tr').remove();
+        if (objList != null && objList.length > 0) {
+
+            for (var i = 0; i < objList.length; i++) {
+                $('#tblSubjects  tbody').append('<tr>' +
+                    '<td class="RowId"> ' + ($('#tblSubjects  tbody tr').length + 1) + ' </td>' +
+                    '<td class="Subject"> ' + objList[i].subject + ' </td>' +
+                    '<td class="Message"> ' + objList[i].message + ' </td>' +
+                    ' <td class="noprint noexport" style="width: 5%; text-align:center;" ><a href="/Home/Emails/' + objList[i].id+ '"  class="btn btn-md blue"><i class="fas fa-share"></i>Send</a></td>' +
+
+                    '</tr>');
+
+            }
+        }
+
+
+
+    }
+
+</script>

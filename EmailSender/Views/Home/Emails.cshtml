@@ -1,0 +1,115 @@
+﻿@using EmailSender.Domain.Entities;
+@model MailMessages
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        margin-top: 1%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #rowAdder {
+        margin-left: 17px;
+    }
+</style>
+
+<div style="width:100%;">
+    <h4><strong>Please Add Emails To Send</strong> </h4>
+    <form>
+        <div class="">
+            <div class="col-lg-12">
+            
+                <div>
+                    <label>Subject</label>
+                    <input type="text" placeholder="Subject" id="Subject" value="@Model.Subject" disabled class="form-control m-input">
+                    <br />
+                    <label>Message</label>
+
+                    <input type="text" placeholder="Message" id="Message" value="@Model.Message" disabled class="form-control m-input">
+                    <br />
+
+                </div>
+                <div id="newinput"></div>
+                <br />
+                <button id="rowAdder" type="button" class="btn btn-success"> ADD Email </button>
+                <button type="button" onclick="SendMail();" class="btn btn-primary">Send</button>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+
+
+    function SendMail(){
+        
+        var Subject = $('#Subject').val();
+        var Message = $('#Message').val();
+        var arrMail = []; // Create an empty array
+        $('#newinput').each(function () {
+            $(this).find('.m-input').each(function () {
+                var inputValue = $(this).val();
+                arrMail.push(inputValue);
+            });
+        });
+        
+        $.ajax({
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            url: "/Home/SendMail",
+            data: JSON.stringify({
+                Mails: arrMail,
+                Subject: Subject,
+                Message, Message
+            }),
+            dataType: "json",
+            success: function (response, data) {
+                if (response.data) {
+                    swal(
+                        'success',
+                        'Sent Successfully.',
+                        'success'
+                    )
+                }
+                else{
+                    swal(
+                        'error',
+                        'Please Enter the Valid Emails!',
+                        'error'
+                    )
+                }
+
+            },
+            error: function (err) {
+            }
+        });
+
+
+
+
+
+    }
+
+    $("#rowAdder").click(function () {
+        newRowAdd =
+            '<div id="row"> <div class="input-group m-3">' +
+            '<div class="input-group-prepend">' +
+            '<input type="text"  placeholder="Email" class="form-control m-input">' +
+            '<button class="btn btn-danger" id="DeleteRow" type="button">' +
+            '<i class="bi bi-trash"></i> Delete</button> </div>' +
+            ' </div> </div> <br/>';
+
+        $('#newinput').append(newRowAdd);
+    });
+    $("body").on("click", "#DeleteRow", function () {
+        $(this).parents("#row").remove();
+    })
+</script>
+
